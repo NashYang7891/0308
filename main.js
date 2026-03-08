@@ -44,7 +44,10 @@
   }
 
   // 联系表单提交（通过邮件客户端发送）
-  var contactForm = document.getElementById("contactForm");
+  // 线上如果表单没有 id，也通过选择器兜底匹配
+  var contactForm =
+    document.getElementById("contactForm") ||
+    document.querySelector(".contact-card form");
   if (contactForm) {
     contactForm.addEventListener("submit", function (e) {
       e.preventDefault();

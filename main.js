@@ -86,7 +86,7 @@
         (message || "-");
 
       var mailto =
-        "mailto:18659157891@wo.cn?subject=" +
+        "mailto:hello@hxyr.ltd?subject=" +
         subject +
         "&body=" +
         encodeURIComponent(body);

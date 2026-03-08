@@ -42,5 +42,54 @@
   if (yearSpan) {
     yearSpan.textContent = new Date().getFullYear();
   }
+
+  // 联系表单提交（通过邮件客户端发送）
+  var contactForm = document.getElementById("contactForm");
+  if (contactForm) {
+    contactForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      var name = (contactForm.elements["name"] && contactForm.elements["name"].value.trim()) || "";
+      var phone = (contactForm.elements["phone"] && contactForm.elements["phone"].value.trim()) || "";
+      var company = (contactForm.elements["company"] && contactForm.elements["company"].value.trim()) || "";
+      var categorySelect = contactForm.elements["category"];
+      var categoryText = "";
+      if (categorySelect && categorySelect.selectedIndex >= 0) {
+        categoryText = categorySelect.options[categorySelect.selectedIndex].text;
+      }
+      var message = (contactForm.elements["message"] && contactForm.elements["message"].value.trim()) || "";
+
+      if (!name || !phone) {
+        alert("请填写姓名和联系方式。");
+        return;
+      }
+
+      // 邮件标题和内容使用阿拉伯语，面向中东客户
+      var subject = encodeURIComponent("استفسار جديد من صفحة هنغ شيانغ يونغ روي");
+      var body =
+        "الاسم: " +
+        name +
+        "\n" +
+        "بيانات التواصل: " +
+        phone +
+        "\n" +
+        "اسم الشركة / الجهة: " +
+        (company || "-") +
+        "\n" +
+        "مجال الطلب: " +
+        (categoryText || "-") +
+        "\n" +
+        "وصف المشروع أو سيناريو الاستخدام: " +
+        (message || "-");
+
+      var mailto =
+        "mailto:18659157891@wo.cn?subject=" +
+        subject +
+        "&body=" +
+        encodeURIComponent(body);
+
+      window.location.href = mailto;
+    });
+  }
 })();
 

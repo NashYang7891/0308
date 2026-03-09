@@ -6,6 +6,162 @@
     el.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  function normalizeLang(lang) {
+    if (!lang) return "";
+    lang = String(lang).toLowerCase();
+    if (lang.startsWith("ar")) return "ar";
+    if (lang.startsWith("en")) return "en";
+    return "";
+  }
+
+  function getQueryLang() {
+    try {
+      var params = new URLSearchParams(window.location.search || "");
+      return normalizeLang(params.get("lang"));
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function getStoredLang() {
+    try {
+      return normalizeLang(window.localStorage.getItem("hxyr_lang"));
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function setStoredLang(lang) {
+    try {
+      window.localStorage.setItem("hxyr_lang", lang);
+    } catch (e) {}
+  }
+
+  function isEnglishPage() {
+    var l = (document.documentElement.getAttribute("lang") || "").toLowerCase();
+    return l === "en" || l.startsWith("en-");
+  }
+
+  function isArabicPage() {
+    var l = (document.documentElement.getAttribute("lang") || "").toLowerCase();
+    return l === "ar" || l.startsWith("ar-");
+  }
+
+  function redirectToLang(lang) {
+    var file = window.location.protocol === "file:";
+    if (lang === "en") {
+      if (!isEnglishPage()) {
+        window.location.href = file ? "en/index.html" : "/en/";
+      }
+      return;
+    }
+    if (lang === "ar") {
+      if (!isArabicPage()) {
+        window.location.href = file ? "../index.html" : "/";
+      }
+    }
+  }
+
+  function countryToLang(country) {
+    // Arabic default for MENA; English for others
+    var arCountries = {
+      AE: 1, SA: 1, QA: 1, KW: 1, BH: 1, OM: 1,
+      EG: 1, JO: 1, LB: 1, IQ: 1, SY: 1, YE: 1,
+      PS: 1, SD: 1, LY: 1, TN: 1, DZ: 1, MA: 1,
+      MR: 1, SO: 1, DJ: 1
+    };
+    if (country && arCountries[String(country).toUpperCase()]) return "ar";
+    return "en";
+  }
+
+  function countryToCurrency(country) {
+    var c = (country || "").toUpperCase();
+    var map = {
+      SA: "SAR",
+      AE: "AED",
+      QA: "QAR",
+      KW: "KWD",
+      BH: "BHD",
+      OM: "OMR",
+      EG: "EGP",
+      JO: "JOD",
+      IQ: "IQD",
+      TR: "TRY"
+    };
+    return map[c] || "USD";
+  }
+
+  function updateCurrencyUI(currency) {
+    var pill = document.getElementById("currencyPill");
+    if (pill) pill.textContent = currency || "—";
+    document.documentElement.dataset.currency = currency || "";
+  }
+
+  function setLocaleMeta(meta) {
+    if (!meta) return;
+    document.documentElement.dataset.country = meta.country || "";
+    updateCurrencyUI(meta.currency || "");
+    try {
+      window.HXYR_LOCALE = {
+        country: meta.country || "",
+        lang: meta.lang || "",
+        currency: meta.currency || ""
+      };
+    } catch (e) {}
+  }
+
+  function parseCloudflareTrace(text) {
+    // Example lines: loc=SA
+    var m = String(text || "").match(/(?:^|\n)loc=([A-Z]{2})(?:\n|$)/i);
+    return m ? m[1].toUpperCase() : "";
+  }
+
+  function detectCountry() {
+    // Prefer Cloudflare edge country when site is behind Cloudflare
+    return fetch("/cdn-cgi/trace", { cache: "no-store" })
+      .then(function (r) {
+        if (!r.ok) throw new Error("trace_not_ok");
+        return r.text();
+      })
+      .then(function (t) {
+        return parseCloudflareTrace(t);
+      })
+      .catch(function () {
+        return "";
+      });
+  }
+
+  // 手动语言覆盖（优先级最高）
+  var queryLang = getQueryLang();
+  if (queryLang) setStoredLang(queryLang);
+  var preferredLang = queryLang || getStoredLang();
+  if (preferredLang) redirectToLang(preferredLang);
+
+  // 绑定语言切换按钮（保存偏好，便于下次自动选择）
+  document.querySelectorAll("[data-set-lang]").forEach(function (el) {
+    el.addEventListener("click", function () {
+      var l = normalizeLang(el.getAttribute("data-set-lang"));
+      if (l) setStoredLang(l);
+    });
+  });
+
+  // 国家识别 → 自动语言/币种（只有在用户未手动指定语言时才触发跳转）
+  detectCountry().then(function (country) {
+    var langFromCountry = country ? countryToLang(country) : "";
+    if (!langFromCountry) {
+      // 国家无法识别时，降级用浏览器语言；都不匹配则默认英文（更通用）
+      langFromCountry = normalizeLang(navigator.language) || "en";
+    }
+    var currency = countryToCurrency(country);
+    setLocaleMeta({ country: country, lang: langFromCountry, currency: currency });
+
+    // 如果用户没有明确指定语言（query/localStorage），才按国家自动跳转
+    var hasExplicitOverride = !!(getQueryLang() || getStoredLang());
+    if (!hasExplicitOverride) {
+      redirectToLang(langFromCountry);
+    }
+  });
+
   document.querySelectorAll("[data-scroll]").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var target = btn.getAttribute("data-scroll");
@@ -63,27 +219,68 @@
       var message = (contactForm.elements["message"] && contactForm.elements["message"].value.trim()) || "";
 
       if (!name || !phone) {
-        alert("请填写姓名和联系方式。");
+        var pageLang = normalizeLang(document.documentElement.getAttribute("lang")) || "ar";
+        alert(pageLang === "en" ? "Please fill in your name and contact info." : "يرجى إدخال الاسم وبيانات التواصل.");
         return;
       }
 
-      // 邮件标题和内容使用阿拉伯语，面向中东客户
-      var subject = encodeURIComponent("استفسار جديد من صفحة هنغ شيانغ يونغ روي");
-      var body =
-        "الاسم: " +
-        name +
-        "\n" +
-        "بيانات التواصل: " +
-        phone +
-        "\n" +
-        "اسم الشركة / الجهة: " +
-        (company || "-") +
-        "\n" +
-        "مجال الطلب: " +
-        (categoryText || "-") +
-        "\n" +
-        "وصف المشروع أو سيناريو الاستخدام: " +
-        (message || "-");
+      var pageLang2 = normalizeLang(document.documentElement.getAttribute("lang")) || "ar";
+      var locale = window.HXYR_LOCALE || {};
+      var currency = locale.currency || document.documentElement.dataset.currency || "";
+      var country = locale.country || document.documentElement.dataset.country || "";
+
+      var subjectText =
+        pageLang2 === "en"
+          ? "New inquiry from hxyr.ltd"
+          : "استفسار جديد من موقع hxyr.ltd";
+      var subject = encodeURIComponent(subjectText);
+
+      var body;
+      if (pageLang2 === "en") {
+        body =
+          "Name: " +
+          name +
+          "\n" +
+          "Contact: " +
+          phone +
+          "\n" +
+          "Company: " +
+          (company || "-") +
+          "\n" +
+          "Category: " +
+          (categoryText || "-") +
+          "\n" +
+          "Preferred currency: " +
+          (currency || "-") +
+          "\n" +
+          "Country (detected): " +
+          (country || "-") +
+          "\n" +
+          "Message: " +
+          (message || "-");
+      } else {
+        body =
+          "الاسم: " +
+          name +
+          "\n" +
+          "بيانات التواصل: " +
+          phone +
+          "\n" +
+          "اسم الشركة / الجهة: " +
+          (company || "-") +
+          "\n" +
+          "مجال الطلب: " +
+          (categoryText || "-") +
+          "\n" +
+          "عملة التسعير المفضلة: " +
+          (currency || "-") +
+          "\n" +
+          "الدولة (تلقائياً): " +
+          (country || "-") +
+          "\n" +
+          "وصف المشروع أو سيناريو الاستخدام: " +
+          (message || "-");
+      }
 
       var mailto =
         "mailto:hello@hxyr.ltd?subject=" +

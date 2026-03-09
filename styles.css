@@ -32,8 +32,8 @@ body {
   background: radial-gradient(circle at top, #0f172a 0%, #020617 50%);
   color: var(--text);
   line-height: 1.7;
-  direction: rtl;
-  text-align: right;
+  direction: inherit;
+  text-align: start;
 }
 
 a {
@@ -132,6 +132,39 @@ img {
   align-items: center;
   gap: 26px;
   font-size: 14px;
+}
+
+.nav-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  color: var(--muted);
+  background: rgba(15, 23, 42, 0.7);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.nav-lang {
+  font-size: 12px;
+  color: var(--muted);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.55);
+  transition: all 0.18s ease;
+}
+
+.nav-lang:hover {
+  color: #e5e7eb;
+  border-color: rgba(148, 163, 184, 0.9);
+  transform: translateY(-1px);
 }
 
 .nav-links a {
@@ -550,6 +583,10 @@ img {
   margin-top: 12px;
   gap: 6px;
   flex-wrap: wrap;
+}
+
+[dir="ltr"] .hero-badge-row {
+  justify-content: flex-start;
 }
 
 .hero-badge {

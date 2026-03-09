@@ -407,6 +407,27 @@
             </div>
           </div>
 
+          <div class="pricing-banner" id="pricingBanner">
+            <div class="pricing-main">
+              <span class="pricing-label">Reference budget for typical solutions</span>
+              <span class="pricing-value">From 50,000 USD</span>
+            </div>
+            <div class="pricing-meta">
+              <span class="pricing-pill">
+                Suggested billing currency:
+                <strong><span id="pricingCurrencyCode">USD</span></strong>
+              </span>
+              <button
+                type="button"
+                class="btn btn-outline pricing-pay-btn"
+                id="onlinePayBtn"
+                disabled
+              >
+                Online payment (coming soon)
+              </button>
+            </div>
+          </div>
+
           <div class="contact-grid">
             <div class="contact-card">
               <form id="contactForm" aria-label="Partnership inquiry form">
@@ -462,6 +483,19 @@
                     <option value="platform">Management platform / secondary development</option>
                     <option value="integrated">End-to-end project / smart upgrade</option>
                     <option value="other">Other / not sure yet</option>
+                  </select>
+                </div>
+
+                <div class="form-field">
+                  <label class="form-label">
+                    <span>Preferred billing currency</span>
+                  </label>
+                  <select class="form-select" name="billingCurrency" id="billingCurrencySelect">
+                    <option value="">Please choose or keep suggested currency</option>
+                    <option value="USD">USD</option>
+                    <option value="SAR">SAR</option>
+                    <option value="AED">AED</option>
+                    <option value="CNY">CNY</option>
                   </select>
                 </div>
 

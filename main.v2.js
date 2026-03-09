@@ -97,10 +97,33 @@
     document.documentElement.dataset.currency = currency || "";
   }
 
+  function syncBillingCurrencyUI(currency) {
+    var code = currency || "USD";
+
+    var select = document.getElementById("billingCurrencySelect");
+    if (select) {
+      var hasOption = false;
+      for (var i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === code) {
+          hasOption = true;
+          break;
+        }
+      }
+      select.value = hasOption ? code : "USD";
+    }
+
+    var codeEl = document.getElementById("pricingCurrencyCode");
+    if (codeEl) {
+      codeEl.textContent = code;
+    }
+  }
+
   function setLocaleMeta(meta) {
     if (!meta) return;
     document.documentElement.dataset.country = meta.country || "";
-    updateCurrencyUI(meta.currency || "");
+    var cur = meta.currency || "";
+    updateCurrencyUI(cur);
+    syncBillingCurrencyUI(cur);
     try {
       window.HXYR_LOCALE = {
         country: meta.country || "",

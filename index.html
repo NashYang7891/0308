@@ -410,6 +410,27 @@
             </div>
           </div>
 
+          <div class="pricing-banner" id="pricingBanner">
+            <div class="pricing-main">
+              <span class="pricing-label">ميزانية مرجعية للحلول النموذجية</span>
+              <span class="pricing-value">من 50,000 USD</span>
+            </div>
+            <div class="pricing-meta">
+              <span class="pricing-pill">
+                عملة التسعير المقترحة:
+                <strong><span id="pricingCurrencyCode">USD</span></strong>
+              </span>
+              <button
+                type="button"
+                class="btn btn-outline pricing-pay-btn"
+                id="onlinePayBtn"
+                disabled
+              >
+                الدفع الإلكتروني (قريباً)
+              </button>
+            </div>
+          </div>
+
           <div class="contact-grid">
           <div class="contact-card">
               <form
@@ -468,6 +489,19 @@
                     <option value="platform">منصة إدارة ذكية / تطوير ثانوي</option>
                     <option value="integrated">مشروع متكامل / ترقية ذكية</option>
                     <option value="other">أخرى / غير محددة بعد</option>
+                  </select>
+                </div>
+
+                <div class="form-field">
+                  <label class="form-label">
+                    <span>عملة التسعير المفضلة</span>
+                  </label>
+                  <select class="form-select" name="billingCurrency" id="billingCurrencySelect">
+                    <option value="">الرجاء اختيار أو الإبقاء على العملة المقترحة</option>
+                    <option value="USD">USD</option>
+                    <option value="SAR">SAR</option>
+                    <option value="AED">AED</option>
+                    <option value="CNY">CNY</option>
                   </select>
                 </div>
 
